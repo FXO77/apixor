@@ -69,7 +69,7 @@ router.post('/login', (req, res) => {
 
       if (user.otp_verified) {
         req.session.username = username;
-     // req.flash('success_msg', "Login berhasil!");
+        // req.flash('success_msg', "Login berhasil!");
         res.redirect("/dashboard");
       } else {
         res.send(`<script>alert('OTP belum diverifikasi!'); window.location.href = '/login';</script>`);
@@ -97,7 +97,7 @@ router.post('/asu', (req, res) => {
 
       if (user.otp_verified) {
         req.session.username = username;
-     // req.flash('success_msg', "Login berhasil!");
+        // req.flash('success_msg', "Login berhasil!");
         res.redirect("/ad");
       } else {
         res.send(`<script>alert('OTP belum diverifikasi!'); window.location.href = '/asu';</script>`);
@@ -111,21 +111,21 @@ router.post('/asu', (req, res) => {
 router.get('/ad', checkAuthad, (req, res) => {
   const sessionUsername = req.session.username;
 
-    db.query('SELECT * FROM users', (err, result) => {
-      if (err) {
-        throw err;
-      }
+  db.query('SELECT * FROM users', (err, result) => {
+    if (err) {
+      throw err;
+    }
 
-      if (result.length > 0) {
-        const users = result;
-        res.render('admin1', {
-          users
-        });
-      } else {
-        res.send('<p>User not Found!</p>');
-      }
-    });
-  }
+    if (result.length > 0) {
+      const users = result;
+      res.render('cob', {
+        users
+      });
+    } else {
+      res.send('<p>User not Found!</p>');
+    }
+  });
+}
 );
 
 
@@ -136,27 +136,27 @@ router.get('/aji', (req, res) => {
 
 // Misalkan Anda mendapatkan data pengguna dari basis data
 //router.post('/asu', (req, res) => {
- // const { username, password } = req.body;
+// const { username, password } = req.body;
 
- // db.query('SELECT * FROM users WHERE username = ? AND password = ?', [username, password], (err, result) => {
-    //if (err) {
-     // console.log(err);
-    //}
+// db.query('SELECT * FROM users WHERE username = ? AND password = ?', [username, password], (err, result) => {
+//if (err) {
+// console.log(err);
+//}
 
-    //if (result.length > 0) {
-      //const user = result[0];
+//if (result.length > 0) {
+//const user = result[0];
 
-      ////if (user.otp_verified) {
-        //req.session.username = username;
-     // req.flash('success_msg', "Login berhasil!");
-        //res.redirect("/dashboard");
-      //} else {
-        //res.send(`<script>alert('OTP belum diverifikasi!'); window.location.href = '/login';</script>`);
-      //}
-    //} else {
-      //res.send(`<script>alert('Username atau Password salah!'); window.location.href = '/login';</script>`);
-    ///}
- // });
+////if (user.otp_verified) {
+//req.session.username = username;
+// req.flash('success_msg', "Login berhasil!");
+//res.redirect("/dashboard");
+//} else {
+//res.send(`<script>alert('OTP belum diverifikasi!'); window.location.href = '/login';</script>`);
+//}
+//} else {
+//res.send(`<script>alert('Username atau Password salah!'); window.location.href = '/login';</script>`);
+///}
+// });
 //});
 
 router.get('/register', (req, res) => {
@@ -408,19 +408,19 @@ router.post('/update-data', (req, res) => {
 
     if (result.length > 0) {
       const user = result[0];
-        const updatedData = {};
-        if (username) updatedData.username = username;
-        if (email) updatedData.email = email;
-        if (password) updatedData.password = password;
+      const updatedData = {};
+      if (username) updatedData.username = username;
+      if (email) updatedData.email = email;
+      if (password) updatedData.password = password;
 
-        db.query('UPDATE users SET ? WHERE username = ?', [updatedData, sessionUsername], (err) => {
-          if (err) {
-            throw err;
-          }
+      db.query('UPDATE users SET ? WHERE username = ?', [updatedData, sessionUsername], (err) => {
+        if (err) {
+          throw err;
+        }
 
-          res.redirect('/account');
-        });
-      } else {
+        res.redirect('/account');
+      });
+    } else {
       res.send('User tidak ditemukan');
     }
   });

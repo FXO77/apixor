@@ -26,21 +26,21 @@ const checkAuth = (req, res, next) => {
 router.get('/ad', checkAuth, (req, res) => {
   const sessionUsername = req.session.username;
 
-    db.query('SELECT * FROM users', (err, result) => {
-      if (err) {
-        throw err;
-      }
+  db.query('SELECT * FROM users', (err, result) => {
+    if (err) {
+      throw err;
+    }
 
-      if (result.length > 0) {
-        const users = result;
-        res.render('index', { users: results }); {
-          users
-        };
-      } else {
-        res.send('<p>User not Found!</p>');
-      }
-    });
-  }
+    if (result.length > 0) {
+      const users = result;
+      res.render('index', { users: results }); {
+        users
+      };
+    } else {
+      res.send('<p>User not Found!</p>');
+    }
+  });
+}
 );
 
 router.get('/add-user', checkAuth, (req, res) => {
