@@ -10,7 +10,94 @@ const { chromium, devices } = require('playwright');
 
 
 //fucbaru
-async function igdl(url) {
+function igdl(url) {
+  return new Promise(async (resolve) => {
+    try {
+      // Validasi URL Instagram
+      if (!url.match(/(https|http):\/\/www.instagram.com\/(p|reel|tv|stories)/gi)) {
+        return resolve({
+          'status': false,
+          'message': "URL tidak valid"
+        });
+      }
+
+      // Fungsi untuk decrypt data
+      function dc(p) {
+        let [b, c, d, e, f, g] = p;
+        function h(i, j, k) {
+          const l = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ+/".split('');
+          let m = l.slice(0, j), n = l.slice(0, k),
+            o = i.split('').reverse().reduce((q, r, s) =>
+              m.indexOf(r) !== -1 ? q + m.indexOf(r) * Math.pow(j, s) : q, 0);
+          let t = '';
+          while (o > 0) t = n[o % k] + t, o = (o - o % k) / k;
+          return t || '0';
+        }
+        g = '';
+        for (let u = 0; u < b.length; u++) {
+          let v = '';
+          while (b[u] !== d[f]) v += b[u++];
+          for (let w = 0; w < d.length; w++)
+            v = v.replace(new RegExp(d[w], 'g'), w.toString());
+          g += String.fromCharCode(h(v, f, 10) - e);
+        }
+        return decodeURIComponent(encodeURIComponent(g));
+      }
+
+      // Kirim request ke situs download
+      const response = await axios.post(
+        "https://snapsave.app/action.php?lang=id",
+        new URLSearchParams({ url }).toString(),
+        {
+          headers: {
+            'accept': "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
+            'content-type': "application/x-www-form-urlencoded",
+            'origin': "https://snapsave.app",
+            'referer': "https://snapsave.app/id",
+            'user-agent': "Mozilla/5.0"
+          }
+        }
+      );
+
+      const serverResponse = response.data;
+
+      // Fungsi untuk mengekstrak parameter decoding
+      function extractDecodingParams(responseText) {
+        return responseText.split("decodeURIComponent(escape(r))}(")[1]
+          .split('))')[0].split(',').map(param => param.replace(/"/g, '').trim());
+      }
+
+      // Proses decoding respon
+      const decodedContent = dc(extractDecodingParams(serverResponse))
+        .split("getElementById(\"download-section\").innerHTML = \"")[1]
+        .split("\"; document.getElementById(\"inputData\").remove(); ")[0]
+        .replace(/\\(\\)?/g, '');
+
+      // Parsing HTML hasil decoding
+      const $ = cheerio.load(decodedContent);
+      const downloadResults = [];
+      $('.download-items').each((_, element) => { // Abaikan index dengan menggunakan `_`
+        const videoLink = $(element).find('.download-items__btn a').attr('href');
+        const thumbnail = $(element).find('.download-items__thumb img').attr('src');
+        downloadResults.push({
+          'thumbnail': thumbnail,
+          'video': videoLink // Ubah thumbnail menjadi videoLink
+        });
+      });
+
+      // Cek apakah ada hasil download
+      if (!downloadResults.length) {
+        return resolve("Tidak ada hasil download! Periksa URL Anda.");
+      }
+
+      return resolve(downloadResults);
+    } catch (error) {
+      return resolve("Permintaan gagal dengan kode 401");
+    }
+  });
+}
+
+async function igdl88888(url) {
   const device = devices['iPhone 12'];
   const browser = await chromium.launch({ headless: true }); // headless: false untuk melihat browser berjalan
   const context = await browser.newContext({ ...device });
