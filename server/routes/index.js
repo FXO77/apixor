@@ -66,6 +66,7 @@ router.post('/login', (req, res) => {
 
     if (result.length > 0) {
       const user = result[0];
+      if (user.banned) return res.send('Akun Anda telah diblokir!');
 
       if (user.otp_verified) {
         req.session.username = username;
