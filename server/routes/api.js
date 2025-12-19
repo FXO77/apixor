@@ -18,8 +18,8 @@ var scrape = require(__path + '/server/scraper/downloader.js');
 var scai = require(__path + '/server/scraper/openai.js');
 var scrse = require(__path + '/server/scraper/search.js')
 var {
-	Configuration,
-	OpenAIApi
+  Configuration,
+  OpenAIApi
 } = require('@saipulanuar/openai');
 var simsimi = require('simsimi-api');
 var sdf = require('stable-diffusion-cjs');
@@ -374,6 +374,39 @@ router.get('/downloader/twitter', (req, res) => {
   });
 });
 
+router.get("/downloader/ti", async (req, res) => {
+  try {
+    const { url } = req.query;
+    if (!url) return res.send("URL kosong");
+
+    // ambil data tiktok (fungsi lu)
+    const data = await scrape.tiktok(url);
+
+    // ambil video dari API orang
+    const video = await axios({
+      url: data.nowm,
+      method: "GET",
+      responseType: "stream",
+      headers: {
+        "User-Agent": "Mozilla/5.0"
+      }
+    });
+
+    // 🔥 INI KUNCI UTAMA
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename="${data.filename}"`
+    );
+    res.setHeader("Content-Type", "video/mp4");
+
+    // kirim ke user
+    video.data.pipe(res);
+
+  } catch (err) {
+    res.send("Error download");
+  }
+});
+
 router.get('/downloader/tiktok', (req, res) => {
   var url = req.query.url;
   var key = req.query.key;
@@ -617,7 +650,7 @@ router.get('/downloader/soundcloud', (req, res) => {
 router.get('/downloader/terabox', (req, res) => {
   var url = req.query.url;
   var key = req.query.key;
-  
+
   if (!url) throw res.json(msg.paramurl);
   if (!key) throw res.json(msg.paramkey);
 
